@@ -1,7 +1,8 @@
 cff-version: 1.2.0
 message: "If you use iTópos in research, teaching, or publication, please cite the software."
 title: "iTópos"
-version: "0.1.0"
+version: "1.0.0"
+doi: "10.5281/zenodo.22864732"
 date-released: "2026-09-20"
 license: "Apache-2.0"
 
@@ -11,7 +12,7 @@ authors:
     orcid: "https://orcid.org/0009-0005-8372-354X"
 
 repository-code: "https://github.com/dhtoolbox/iTopos"
-url: "https://github.com/dhtoolbox/iTopos"
+url: "https://dhtoolbox.github.io/iTopos"
 
 abstract: >-
   iTópos is an open-source browser-based application for interactive mapping,
