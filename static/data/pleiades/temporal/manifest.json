@@ -1,0 +1,24 @@
+{
+  "format_version": 2,
+  "places": 39404,
+  "records": 41954,
+  "located_places": 32961,
+  "unlocated_places": 6443,
+  "locations": 41115,
+  "names": 40429,
+  "location_attestations": 72984,
+  "name_attestations": 68215,
+  "time_periods": 220,
+  "period_place_mappings": 85564,
+  "shards": 9,
+  "period_schema": [
+    "key",
+    "term",
+    "lower_bound",
+    "upper_bound"
+  ],
+  "attestation_schema": [
+    "period_index",
+    "confidence_index"
+  ]
+}

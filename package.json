@@ -1,0 +1,33 @@
+{
+  "name": "iTopos",
+  "version": "1.0.0",
+  "description": "iTópos is a browser-side spatial visualizer designed to parse, validate, and plot numeric **Pleiades IDs** from Excel or CSV spreadsheets directly onto an interactive MapLibre map.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "http-server . --cors -c3600",
+    "start:nocache": "http-server . --cors -c-1",
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "jsdom": "^30.0.1",
+    "papaparse": "^5.6.0",
+    "prettier": "3.9.6",
+    "vite-plugin-purgecss": "^0.2.13",
+    "vitest": "^4.1.11",
+    "xlsx": "^0.18.5"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true,
+    "esbuild@0.25.12": true
+  }
+}

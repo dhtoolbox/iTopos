@@ -1,0 +1,96 @@
+.map-context,
+.layer-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.map-context h3,
+.layer-section-header h3 {
+    margin: 0;
+    color: var(--color-secondary-darker);
+    font-size: var(--font-size-section);
+    font-weight: 700;
+    letter-spacing: 0.065em;
+    text-transform: uppercase;
+}
+
+.map-context-select,
+.layer-section-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.layer-section-separator {
+    color: var(--color-border);
+}
+
+#map-context-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.layers-context,
+.shading-section {
+    margin: 12px 0 0;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--color-border-faint);
+}
+
+.layers-context:first-of-type {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.layers-context label,
+.shading-section label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 28px;
+    margin: 0;
+    padding: 3px 5px;
+    border-radius: 8px;
+    color: var(--color-text);
+    font-size: var(--font-size-control);
+    cursor: pointer;
+}
+
+.layers-context label:hover,
+.shading-section label:hover {
+    background: var(--color-secondary-subtle);
+}
+
+.layer-option {
+    margin-bottom: 6px;
+    cursor: pointer;
+}
+
+.shading-section__warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 2px 0 7px;
+    padding: 9px 10px;
+    border: 1px solid #eadfcf;
+    border-radius: 9px;
+    background: var(--color-warning-subtle);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
+    line-height: 1.4;
+}
+
+.shading-section__warning img {
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    margin-top: 1px;
+}

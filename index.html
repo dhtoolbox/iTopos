@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>iTópos</title>
+  <link rel="icon" type="image/svg+xml" href="./static/favicon.svg">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.2.0/dist/maplibre-gl.css"
+        onerror="this.onerror=null; this.href='./static/vendor/maplibre-gl.css';">
+  <link rel="stylesheet" href="static/main.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-title">
+    <h1>
+      <span class="site-title__brand">iTópos</span>
+      <i>Map your Pleiades places</i>
+    </h1>
+  </div>
+  <div id="app-status" class="app-status" role="status" aria-live="polite" hidden></div>
+  <nav class="site-utilities" aria-label="Site links">
+    <a class="site-utility"
+       href="https://github.com/dhtoolbox/iTopos"
+       target="_blank"
+       rel="noopener noreferrer"
+       title="iTópos on GitHub">
+      GitHub
+    </a>
+    <span class="site-utility site-utility--sponsor site-utility--disabled" aria-disabled="true"
+          title="GitHub Sponsors coming soon"><span class="site-utility__heart"
+                                                    aria-hidden="true">♡</span> Sponsor</span>
+    <button id="help-button" class="site-utility site-utility--button" type="button">
+      <img class="help-icon" src="./static/vendor/icons/circle-question-solid.svg" alt="" aria-hidden="true">
+      <span>How to Use</span>
+    </button>
+  </nav>
+</header>
+
+<main class="layout drawer-is-minimized">
+  <aside id="tool-drawer" class="tool-drawer is-minimized" aria-label="iTópos tools">
+    <div class="tool-drawer__tabs" role="tablist" aria-label="iTópos tools">
+      <button
+        class="tool-drawer__tab"
+        type="button"
+        role="tab"
+        aria-selected="true"
+        data-drawer-tab="data"
+        aria-label="Upload"
+        title="Upload"
+      >
+        <img src="./static/vendor/icons/file-arrow-up-solid.svg" alt="" aria-hidden="true">
+        <span>Upload</span>
+      </button>
+      <button
+        class="tool-drawer__tab"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        data-drawer-tab="pleiades"
+        aria-label="Browse Places"
+        title="Browse Places"
+      >
+        <img src="./static/vendor/icons/binoculars.svg" alt="" aria-hidden="true">
+        <span>Browse Places</span>
+      </button>
+      <button
+        class="tool-drawer__tab"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        data-drawer-tab="layers"
+        aria-label="Layers"
+        title="Layers"
+      >
+        <img src="./static/vendor/icons/layer-group-solid.svg" alt="" aria-hidden="true">
+        <span>Layers</span>
+      </button>
+      <button
+        id="tool-drawer-minimize"
+        class="tool-drawer__minimize"
+        type="button"
+        aria-label="Minimize tool drawer"
+        aria-expanded="true"
+      ><img class="ui-panel__icon" src="./static/vendor/icons/angles-left.svg" alt="" aria-hidden="true">
+      </button>
+    </div>
+
+    <div class="tool-drawer__body">
+      <div class="tool-drawer__pane" data-drawer-pane="pleiades" role="tabpanel" hidden>
+        <section id="pleiades-search" class="drawer-section pleiades-search">
+          <div class="browse-places__scroll">
+            <div class="browse-intro-row">
+              <p class="browse-intro">
+                Find places by ID and/or place name, and/or feature category.
+                Select to map.
+              </p>
+              <button id="browse-info" class="browse-info" type="button" aria-label="About Browse Places"
+                      aria-expanded="false" title="About Browse Places">
+                <img src="./static/vendor/icons/info-circle.svg" alt="" aria-hidden="true">
+              </button>
+              <div id="browse-info-popover" class="browse-info-popover" hidden>
+                Unmappable places are excluded.
+                Place names are not unique, so check the Pleiades ID and/or representative point when
+                needed.
+                A place can have more than one
+                <a href="https://pleiades.stoa.org/vocabularies/place-types/" target="_blank"
+                   rel="noopener noreferrer">Pleiades feature category ↗</a>.
+              </div>
+            </div>
+
+            <div id="browse-loading" class="browse-loading" role="status">Loading Pleiades index…</div>
+
+            <section class="browse-builder__section">
+              <div class="browse-builder__header">
+                <h3 class="browse-builder__title"></h3>
+                <div class="drawer-section__heading-row drawer-section__heading-row--actions">
+                  <button id="browse-clear-all" class="text-button" type="button">Reset Search
+                  </button>
+                </div>
+              </div>
+              <div class="browse-autocomplete">
+                <label for="browse-id-query">
+                                    <span class="browse-field-heading"><span>Pleiades ID</span><span
+                                      id="browse-id-selection-summary"
+                                      class="browse-selection-summary">0 selected</span></span>
+                  <input id="browse-id-query" type="search" inputmode="numeric" autocomplete="off"
+                         placeholder="e.g. 993">
+                  <button type="button" class="clear-search-btn" aria-label="Clear search id">×
+                  </button>
+                </label>
+                <div id="browse-id-suggestions" class="browse-suggestions" hidden></div>
+              </div>
+
+              <div class="browse-builder__join" aria-hidden="true"><span> OR </span></div>
+
+              <div class="browse-autocomplete">
+                <label for="browse-name-query">
+                                    <span class="browse-field-heading"><span>Place Name</span><span
+                                      id="browse-name-selection-summary"
+                                      class="browse-selection-summary">0 selected</span></span>
+                  <input id="browse-name-query" type="search" autocomplete="off"
+                         placeholder="e.g. Athenae">
+                  <button type="button" class="clear-search-btn" aria-label="Clear search name">×
+                  </button>
+                </label>
+                <div id="browse-name-suggestions" class="browse-suggestions" hidden></div>
+              </div>
+
+              <div class="browse-builder__join" aria-hidden="true"><span> OR </span></div>
+
+              <div class="browse-autocomplete">
+                <label for="browse-type-query">
+                                    <span class="browse-field-heading"><span>Feature Categories</span><span
+                                      id="browse-type-selection-summary"
+                                      class="browse-selection-summary">0 selected</span></span>
+                  <input id="browse-type-query" type="search" autocomplete="off"
+                         placeholder="e.g. castle">
+                  <button type="button" class="clear-search-btn" aria-label="Clear search type">×
+                  </button>
+                </label>
+                <div id="browse-type-suggestions" class="browse-suggestions" hidden></div>
+              </div>
+
+              <div class="browse-builder__join" aria-hidden="true"><span> OR </span></div>
+
+              <div class="browse-autocomplete">
+                <label for="browse-period-query">
+                  <span class="browse-field-heading"><span>Time Period</span><span id="browse-period-selection-summary"
+                                                                                   class="browse-selection-summary">0 selected</span></span>
+                  <input id="browse-period-query" type="search" autocomplete="off" placeholder="e.g. Roman">
+                  <button type="button" class="clear-search-btn" aria-label="Clear search time period">×</button>
+                </label>
+                <div id="browse-period-suggestions" class="browse-suggestions" hidden></div>
+              </div>
+            </section>
+
+            <section class="browse-results-section">
+              <div id="browse-place-type__options" class="browse-place-type__options" hidden>
+                <strong>Filter Search Options</strong>
+                <span id="browse-radio-group" class="browse-radio-group">
+                                    <label class="browse-builder__radio">
+                                        Feature Categories should match
+                                        <input type="radio" name="browse-type-relationship" value="or" checked>
+                                        Any
+                                        <input type="radio" name="browse-type-relationship" value="and">
+                                        All
+                                    </label>
+                                </span>
+                <label id="browse-narrow-row" class="browse-builder__narrow">
+                  <input id="browse-narrow-types" type="checkbox" disabled>
+                  Cross-reference selected places with selected feature category/categories to narrow results.
+                </label>
+                <label id="browse-narrow-period-row" class="browse-builder__narrow">
+                  <input id="browse-narrow-periods" type="checkbox" disabled>
+                  Cross-reference selected places with selected time period(s) to narrow results.
+                </label>
+              </div>
+
+              <div class="pleiades-search__result-header">
+                <strong id="pleiades-search-summary"></strong>
+                <div id="pleiades-results-selection-actions" class="selection-actions" hidden="">
+                  <button id="pleiades-results-all"
+                          class="selection-action"
+                          type="button" disabled>All
+                  </button>
+                  <span class="selection-action-separator">|</span>
+                  <button id="pleiades-results-none"
+                          class="selection-action"
+                          type="button"
+                          disabled>None
+                  </button>
+                </div>
+              </div>
+
+              <div id="pleiades-search-results" class="pleiades-search__results"></div>
+              <button id="pleiades-results-more" class="text-button" type="button" hidden>Show more
+              </button>
+
+            </section>
+          </div>
+
+          <div class="browse-map-footer">
+            <div class="browse-map-footer__action">
+              <button id="pleiades-map-selected" class="primary-button" type="button" disabled>Map places
+              </button>
+            </div>
+            <div class="browse-map-footer__note">Large sets may take longer to display.</div>
+            <button id="browse-export-places" class="text-button browse-export-places" type="button" hidden>
+              <img src="./static/vendor/icons/download.svg" alt="" aria-hidden="true">
+              <span>Export mapped Places</span>
+            </button>
+          </div>
+        </section>
+      </div>
+      <div class="tool-drawer__pane" data-drawer-pane="data" role="tabpanel">
+        <section id="upload-panel" class="drawer-section">
+          <div id="drop-zone" class="drop-zone">
+            <div class="drop-content">
+              <h2 id="drop-title">Drag and drop your spreadsheet here</h2>
+              <p id="drop-instruction" class="supporting_text"></p>
+              <p class="or">or</p>
+              <button id="choose-file-button" class="primary-button" type="button">Choose a file</button>
+              <input id="file-input" type="file" hidden>
+              <p class="supporting_text">Excel (.xlsx, .xls) · CSV (.csv, .txt)</p>
+              <p class="privacy-note"><strong>This site does not store your file.</strong></p>
+            </div>
+          </div>
+          <div id="uploaded-file-info" class="uploaded-file-info" hidden>
+            <div class="uploaded-file-info__name">
+              <img src="./static/vendor/icons/file-alt.svg" alt="" aria-hidden="true">
+              <span id="uploaded-file-name"></span>
+            </div>
+            <p>Your file is processed entirely in your browser.</p>
+          </div>
+        </section>
+
+        <section id="report-section" class="drawer-section" hidden>
+          <h2 class="report-section__title">Processing report</h2>
+          <div id="report-summary"></div>
+          <div id="report-problems"></div>
+          <p class="dataset-freshness">
+            Pleiades dataset: <span id="dataset-refresh-date">loading…</span>
+          </p>
+        </section>
+      </div>
+
+      <div class="tool-drawer__pane" data-drawer-pane="layers" role="tabpanel" hidden>
+        <section id="map-context-panel" class="drawer-section">
+          <section class="layers-context map-context-layers">
+            <div class="map-context">
+              <h3>Context layers</h3>
+              <div class="map-context-select selection-actions">
+                <button id="context-select-all" class="map-context-select-label selection-action"
+                        type="button">All
+                </button>
+                <span class="layer-section-separator selection-action-separator">|</span>
+                <button id="context-clear-all" class="map-context-select-label selection-action"
+                        type="button">None
+                </button>
+              </div>
+            </div>
+            <label>
+              <input type="checkbox" data-layer="ne-country-line" checked> Modern Country Boundary Lines
+            </label>
+            <label>
+              <input type="checkbox" data-layer="ne-country-labels" checked> Modern Country Names
+            </label>
+            <label>
+              <input type="checkbox" data-layer="ne-marine-labels" checked> Modern Marine Names
+            </label>
+          </section>
+          <section class="shading-section"><!-- controls.js populates this --></section>
+        </section>
+      </div>
+    </div>
+  </aside>
+
+  <section id="map-container" class="map-wrap">
+    <div id="map" aria-label="iTópos interactive map"></div>
+    <div id="map-info-stack" class="map-info-stack">
+      <div id="explore-widget" hidden></div>
+    </div>
+    <section id="temporal-widget" class="temporal-widget" aria-label="Temporal view" hidden></section>
+  </section>
+</main>
+
+<dialog id="export-places-dialog" class="export-places-dialog" aria-labelledby="export-places-title">
+  <form id="export-places-form" method="dialog">
+    <div class="dialog-header">
+      <div>
+        <h2 id="export-places-title">Export mapped Places</h2>
+        <p id="export-places-count" class="export-places-count"></p>
+      </div>
+      <button id="export-places-close" class="dialog-close" type="button" aria-label="Close">×</button>
+    </div>
+    <fieldset class="export-format">
+      <legend>Format</legend>
+      <label><input type="radio" name="export-format" value="csv" checked> CSV</label>
+      <label><input type="radio" name="export-format" value="json"> JSON</label>
+    </fieldset>
+    <div class="export-places-heading"><strong>Fields</strong><span>Output name</span></div>
+    <div id="export-places-fields" class="export-places-fields"></div>
+    <p class="export-places-note">CSV exports one row per Place and Group, when applicable. Multiple Feature Categories are separated by semicolons. JSON preserves arrays.</p>
+    <p id="export-places-error" class="export-places-error" role="alert" hidden></p>
+    <div class="export-places-actions">
+      <button class="primary-button" type="submit">Export</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="welcome-dialog" class="welcome-dialog" aria-labelledby="welcome-title">
+  <div class="welcome-dialog__content">
+    <button id="welcome-close" class="welcome-dialog__close dialog-close" type="button" aria-label="Close welcome">
+      ×
+    </button>
+    <div class="welcome-dialog__brand">
+      <h2 id="welcome-title">Welcome to <span>iTópos</span></h2>
+    </div>
+    <p><small><i>Explore Pleiades places with historical and geographic context.</i></small></p>
+    <div class="welcome-dialog__actions">
+      <button id="welcome-upload" class="welcome-choice" type="button">
+        <img src="./static/vendor/icons/file-arrow-up-solid.svg" alt="" aria-hidden="true">
+        <span><strong>Upload places</strong><small>I have Pleiades IDs.</small></span>
+      </button>
+      <button id="welcome-browse" class="welcome-choice" type="button">
+        <img src="./static/vendor/icons/binoculars.svg" alt="" aria-hidden="true">
+        <span><strong>Browse places</strong><small>I want to find places by Pleiades ID, name, feature category, and/or time period.</small></span>
+      </button>
+      <button id="welcome-castles" class="welcome-choice" type="button">
+        <img id="welcome-castle-icon" src="./static/vendor/icons/places/fort-awesome-brands-solid.svg" alt=""
+             aria-hidden="true">
+        <span><strong>Show me castles</strong><small>An example of how iTópos works.</small></span>
+      </button>
+      <button id="welcome-help" class="welcome-choice" type="button">
+        <span><img src="./static/vendor/icons/circle-question-solid.svg" alt="" aria-hidden="true"></span>
+        <span><strong>How to use iTópos</strong><small>More information.</small></span>
+      </button>
+    </div>
+    <p class="welcome-dialog__privacy">This site does not store any uploaded data.</p>
+  </div>
+</dialog>
+
+<!-- User Instruction Manual Dialogue Modals Components Frame -->
+<dialog id="help-dialog" aria-labelledby="help-title">
+  <div class="help-nav">
+    <div class="dialog-header">
+      <h2 id="help-title">How to Use <span>iTópos</span></h2>
+      <button id="help-close" class="dialog-close" type="button" aria-label="Close">×</button>
+    </div>
+
+    <div class="help-tabs" role="tablist" aria-label="How to use iTópos">
+    <button id="help-tab-upload" class="help-tab is-active" type="button" role="tab" aria-selected="true"
+            aria-controls="help-panel-upload">Upload
+    </button>
+    <button id="help-tab-browse" class="help-tab" type="button" role="tab" aria-selected="false"
+            aria-controls="help-panel-browse">Browse Places
+    </button>
+    <button id="help-tab-map" class="help-tab" type="button" role="tab" aria-selected="false"
+            aria-controls="help-panel-map">Map Symbols
+    </button>
+    <button id="help-tab-temporal" class="help-tab" type="button" role="tab" aria-selected="false"
+            aria-controls="help-panel-temporal">Temporal Exploration
+    </button>
+    </div>
+  </div>
+
+  <section id="help-panel-upload" class="help-tab-panel" role="tabpanel" aria-labelledby="help-tab-upload">
+    <div class="dialog-intro">
+      <p>Upload your own list of Pleiades places from <strong>Excel, CSV, or text</strong>. Your file is processed
+        entirely in your browser and is not stored by this site.</p>
+    </div>
+    <div class="help-steps">
+      <div class="help-step-card">
+        <img class="help-step-icon" src="./static/vendor/icons/clipboard-list.svg" alt="" aria-hidden="true">
+        <div class="step-content">
+          <h3>Prepare your file</h3>
+          <p>Each place needs a Pleiades ID. The simplest file is one column of IDs; canonical Pleiades place
+            URIs are accepted too. A header row is optional and case-insensitive.</p>
+          <p>Accepted ID headers:</p>
+          <span
+            class="help-code-group"><code>id</code><code>pid</code><code>place_id</code><code>pleiades_id</code><code>pleiades</code><code>uri</code></span>
+        </div>
+      </div>
+      <div class="help-step-card">
+        <img class="help-step-icon" src="./static/vendor/icons/lightbulb-regular.svg" alt="" aria-hidden="true">
+        <div class="step-content">
+          <h3>Add groups (optional)</h3>
+          <p>Add a <code>group</code> column to categorize places. Use one group name per row. Repeat an ID on
+            additional rows when a place belongs to more than one group.</p>
+        </div>
+      </div>
+      <div class="help-step-card">
+        <img class="help-step-icon" src="./static/vendor/icons/file-arrow-up-solid.svg" alt=""
+             aria-hidden="true">
+        <div class="step-content">
+          <h3>Upload your file</h3>
+          <p>Drag and drop the file into Upload, or choose a file. Excel (.xlsx, .xls) and CSV/text (.csv,
+            .txt) are supported. Extra columns are ignored; hidden or filtered Excel rows are skipped; all
+            worksheets are processed.</p>
+        </div>
+      </div>
+    </div>
+    <div id="help-samples" class="help-samples help-footer-callout">
+      <h3>Download a sample template</h3>
+      <div class="help-sample-links">
+        <a class="download-link" href="./static/samples/iTopos-template.xlsx" download><img
+          src="./static/vendor/icons/file-excel.svg" alt="" aria-hidden="true">XLSX</a>
+        <a class="download-link" href="./static/samples/iTopos-template.csv" download><img
+          src="./static/vendor/icons/file-csv.svg" alt="" aria-hidden="true">CSV</a>
+        <a class="download-link" href="./static/samples/iTopos-template.xls" download><img
+          src="./static/vendor/icons/file-excel.svg" alt="" aria-hidden="true">XLS</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="help-panel-browse" class="help-tab-panel" role="tabpanel" aria-labelledby="help-tab-browse" hidden>
+    <div class="dialog-intro">
+      <p>Build a map from Pleiades by searching <strong>ID</strong>, <strong>place name</strong>,
+        <strong>feature category</strong>, and/or <strong>time period</strong>. Each search provides
+        a way into the Pleiades corpus. Filter Search Options can then cross-reference selected
+        criteria to narrow the mapped Places. Unlocated places cannot be mapped and are excluded.
+      </p>
+    </div>
+    <div class="help-steps">
+      <div class="help-step-card">
+        <img class="help-step-icon" src="./static/vendor/icons/binoculars.svg" alt="" aria-hidden="true">
+        <div class="step-content">
+          <h3>Find places</h3>
+          <p>Select one or more ID or place-name suggestions. ID suggestions match the beginning of the ID.
+            Place names are not unique, so use the Pleiades ID and representative point when you need to
+            distinguish records.</p>
+        </div>
+      </div>
+      <div class="help-step-card">
+        <img class="help-step-icon" src="./static/vendor/icons/filter.svg" alt="" aria-hidden="true">
+        <div class="step-content">
+          <h3>Feature categories</h3>
+          <p>Select one or more feature categories. With two or more categories, <strong>Match Any (OR)</strong> finds
+            places with any selected type and <strong>Match All (AND)</strong> requires every selected type.
+            Selected types can also narrow results already found by ID or name.</p>
+        </div>
+      </div>
+      <div class="help-step-card">
+        <img class="help-step-icon" src="./static/vendor/icons/clock.svg" alt="" aria-hidden="true">
+        <div class="step-content">
+          <h3>Time Period</h3>
+          <p>Find places with one or more locations and names with attested time-periods.
+            Search the list by name. Multiple selected time periods are treated as alternatives (OR).
+            Use Filter Search Options to cross-reference the result with other Browse criteria.</p>
+        </div>
+      </div>
+      <div class="help-step-card">
+        <img class="help-step-icon" src="./static/vendor/icons/list-ul-solid.svg" alt="" aria-hidden="true">
+        <div class="step-content">
+          <h3>Choose and map search results</h3>
+          <p>Results show the Pleiades ID, representative point, and feature categories for each selected place. Use
+            All, None, or individual checkboxes to customize the list. Then, choose <strong>Map
+              places</strong>.</p>
+        </div>
+      </div>
+    </div>
+    <div class="help-example-action">
+      <div><strong>Want to see how it works?</strong><span>Load a real place-type example.</span></div>
+      <button id="help-castles" class="secondary-button icon-button" type="button"><img
+        src="./static/vendor/icons/places/fort-awesome-brands-solid.svg" alt="" aria-hidden="true">Map
+        castles
+      </button>
+    </div>
+  </section>
+
+  <section id="help-panel-map" class="help-tab-panel" role="tabpanel" aria-labelledby="help-tab-map" hidden>
+    <div class="dialog-intro">
+      <p>Read the symbols on the map, then use <img
+        src="./static/vendor/icons/magnifying-glass-location-solid.svg" alt="" aria-hidden="true">
+        <strong>Explore</strong>
+        to focus groups and feature categories.</p>
+    </div>
+    <div class="help-read-map">
+      <div class="help-read-map-row"><img src="./static/map-nav-home.svg" alt="" aria-hidden="true">
+        <div><strong>Home button</strong>
+          <p>Use the Home button located on the right side of the map to reset the zoom level.</p></div>
+      </div>
+      <div class="help-read-map-row"><img src="./static/map-nav-cluster.svg" alt="" aria-hidden="true">
+        <div><strong>Cluster / individual Places</strong>
+          <p>Toggle clustering to inspect individual Places without zooming further. Clustering is recommended for large
+            datasets and overview maps. Disabling clustering can render slowly or lag with large datasets.</p></div>
+      </div>
+      <div class="help-read-map-row"><img src="./static/vendor/icons/magnifying-glass-location-solid.svg" alt=""
+                                          aria-hidden="true">
+        <div><strong>Explore</strong>
+          <p>Once places are mapped, in Explore, click a group or feature category to focus matching places.
+            <strong>Esc</strong> clears the current focus.</p></div>
+      </div>
+      <div class="help-read-map-row"><span class="help-link-symbol" aria-hidden="true">↗</span>
+        <div><strong>External link</strong>
+          <p>For each place point, click it to see the place popup. Click a group name, if available, to focus
+            that group. The ↗ symbol opens the linked Pleiades place or feature category in a new browser tab.</p>
+        </div>
+      </div>
+
+      <div class="help-read-map-row"><span class="place-marker" aria-hidden="true"></span>
+        <div><strong>Place</strong>
+          <p>A mapped point that represents a Pleiades place.</p></div>
+      </div>
+      <div class="help-read-map-row"><span class="special-marker">?</span>
+        <div><strong>Group not specified</strong>
+          <p>The uploaded file uses groups, but this place is not assigned to one.</p></div>
+      </div>
+      <div class="help-read-map-row"><span class="special-marker">#</span>
+        <div><strong>Multiple groups</strong>
+          <p>The place belongs to two or more groups.</p></div>
+      </div>
+      <div class="help-read-map-row"><span class="cluster-marker">12</span>
+        <div><strong>Clustered places</strong>
+          <p>A numbered map pin represents nearby places at the current zoom. Click it to zoom in. During Temporal
+            Exploration, a fraction such as <strong>4/12</strong> shows places matching the active time period(s) out of
+            all places in the cluster.</p></div>
+      </div>
+      <div class="help-read-map-row"><span class="special-marker">+</span>
+        <div><strong>Co-located places</strong>
+          <p>Multiple places share the same representative point. Click the marker to inspect them.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="help-panel-temporal" class="help-tab-panel" role="tabpanel" aria-labelledby="help-tab-temporal" hidden>
+    <div class="dialog-intro">
+      <p>Pleiades time-periods can overlap and can be geographically specific; they are not a singular or contiguous
+        historical timeline. <img src="./static/vendor/icons/globe.svg" alt="" aria-hidden="true">
+        <strong>Temporal Exploration</strong> uses Pleiades time-period attestations to show how the mapped corpus
+        changes across overlapping periods.
+      </p>
+    </div>
+    <div class="help-steps">
+      <div class="help-step-card">
+        <img class="help-step-icon" src="./static/vendor/icons/clock.svg" alt="" aria-hidden="true">
+        <div class="step-content"><h3>Choose time periods</h3>
+          <p>The score starts with a small selection of periods represented in the mapped corpus. Use the clock to
+            search the available periods and choose which lines are displayed. Each line shows that period's date range,
+            so overlaps and nested periods remain visible.</p>
+        </div>
+      </div>
+      <div class="help-step-card">
+        <img class="help-step-icon" src="./static/vendor/icons/gear.svg" alt="" aria-hidden="true">
+        <div class="step-content"><h3>Choose attestation confidence</h3>
+          <p>Use the gear to include or exclude Pleiades attestation-confidence levels. These settings change which
+            temporal evidence participates in the score, map, and statistics.</p>
+        </div>
+      </div>
+      <div class="help-step-card">
+        <img class="help-step-icon" src="./static/vendor/icons/list-1-2.svg" alt="" aria-hidden="true">
+        <div class="step-content"><h3>Select and compare time-periods</h3>
+          <p>Click or tap a line to view one period. On a keyboard, <strong>Ctrl/Cmd-click</strong> deliberately
+            combines periods. The map and temporal statistics update from the active selection. Disable temporal
+            filtering to keep the score visible without filtering the map.</p>
+        </div>
+      </div>
+      <div class="help-step-card">
+        <img class="help-step-icon" src="./static/vendor/icons/location-arrow.svg" alt="" aria-hidden="true">
+        <div class="step-content"><h3>Read the map and popups</h3>
+          <p>Individual Places with matching temporal evidence remain prominent while other mapped Places recede. Place
+            markers can show counts of attested Locations and Names. Cluster pins show nearby Place totals; during
+            temporal filtering they show active/total fractions. Popups always show available temporal evidence and
+            highlight the active period rows.</p>
+          <p>A Place without evidence for the active period remains part of the mapped corpus. Temporal Exploration does
+            <strong>not</strong> assert that the Place did not exist. Pleiades Locations or Names without a time-period
+            attestation are reported as an <strong>unspecified date range</strong>.</p>
+        </div>
+      </div>
+      <div class="help-step-card">
+        <span class="help-step-icon help-play-symbol" aria-hidden="true">▶</span>
+        <div class="step-content"><h3>Play through the score</h3>
+          <p>Playback walks through the selected displayed periods in start-date order. Only the period currently being
+            played is highlighted. Pause keeps the current period; Stop restores all displayed periods.</p>
+          <p>For smaller datasets, disabling clustering can make the changing individual Places easier to see. For large
+            datasets, keep clustering enabled to avoid slow rendering.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</dialog>
+
+<!-- Third-Party Dependencies Delivery Scripts Pipelines -->
+<script type="text/javascript" src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"
+        onerror="this.onerror=null; var s=document.createElement('script'); s.src='./static/vendor/xlsx.full.min.js'; document.head.appendChild(s);"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.5.4/papaparse.min.js"
+        onerror="this.onerror=null; var s=document.createElement('script'); s.src='./static/vendor/papaparse.min.js'; document.head.appendChild(s);"></script>
+<script src="https://unpkg.com/pmtiles@4.4.1/dist/pmtiles.js"
+        onerror="this.onerror=null; var s=document.createElement('script'); s.src='./static/vendor/pmtiles.js'; document.head.appendChild(s);"></script>
+<script type="module">
+  let maplibreglModule;
+  try {
+    // 1. Attempt to import from the unpkg CDN
+    maplibreglModule = await import("https://unpkg.com/maplibre-gl@6.2.0/dist/maplibre-gl.mjs");
+  } catch (error) {
+    console.warn("MapLibre CDN failed to load or user is offline. Falling back to local backup asset.");
+    // 2. Fall back to the local self-hosted file if the CDN fails
+    maplibreglModule = await import("./static/vendor/maplibre-gl.mjs");
+  }
+  // 3. Keep the global assignment exactly as the companion files expect
+  window.maplibregl = maplibreglModule;
+</script>
+
+
+<!-- Project Application Logic Layer Blueprints Files -->
+<script type="module" src="./static/map.js"></script>
+<script type="module" src="./static/main.js"></script>
+
+
+<script data-goatcounter="https://itopos.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

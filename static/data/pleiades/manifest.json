@@ -1,0 +1,30 @@
+{
+  "format_version": 2,
+  "source": "Pleiades GIS",
+  "source_url": "https://atlantides.org/downloads/pleiades/gis/pleiades_gis_data.zip",
+  "refreshed_at": "2026-08-29T22:39:26.714642+00:00",
+  "places": 42314,
+  "located": 34738,
+  "unlocated": 7576,
+  "place_types": 233,
+  "type_mappings": 50728,
+  "shards": 9,
+  "search_records": 34738,
+  "place_names": 29577,
+  "temporal": true,
+  "temporal_places": 39404,
+  "temporal_records": 41954,
+  "temporal_located_places": 32961,
+  "temporal_unlocated_places": 6443,
+  "search_schema": [
+    "id",
+    "title",
+    "latitude",
+    "longitude",
+    "type_indexes"
+  ],
+  "type_schema": [
+    "key",
+    "term"
+  ]
+}

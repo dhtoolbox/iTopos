@@ -1,0 +1,221 @@
+.explore {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 0;
+}
+
+.explore__section {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.explore__section + .explore__section {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-top: 2px solid var(--color-border-light);
+}
+
+.explore__section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 3px 1px;
+    min-height: 30px;
+    color: var(--color-secondary-darker);
+}
+
+.explore__section-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 3px;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 24px;
+    padding: 1px 2px;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--color-secondary-darker);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.explore__section-toggle:hover,
+.explore__section-toggle:focus-visible {
+    background: var(--color-surface-subtle);
+}
+
+.explore__section-title {
+    margin: 0;
+    color: var(--color-secondary-darker);
+    font-size: var(--font-size-section);
+    font-weight: 750;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    min-width: 130px;
+}
+
+.explore__section-indicator {
+    order: -1;
+    flex: 0 0 16px;
+    width: 20px;
+    color: var(--color-secondary-darker);
+    font-size: var(--font-size-body);
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+}
+
+.explore__section-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 0 2px 6px;
+}
+
+.explore__section-body[hidden] {
+    display: none;
+}
+
+.explore__options {
+    overflow: visible;
+}
+
+.explore__filter-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 24px;
+    padding: 0 2px;
+    border-radius: var(--radius-small);
+    min-width: 0;
+}
+
+.explore__checkbox {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.explore__locate {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 6px;
+    min-height: 23px;
+    padding: 2px 4px;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: var(--font-size-small);
+    text-align: left;
+    cursor: zoom-in;
+    min-width: 0;
+}
+
+.explore__locate:hover:not(:disabled),
+.explore__locate:focus-visible:not(:disabled) {
+    background: var(--color-secondary-subtle);
+}
+
+.explore__locate:hover .explore__label {
+    color: var(--color-link-hover);
+}
+
+.explore__locate.is-active {
+    background: var(--color-secondary-subtle);
+    color: var(--color-secondary-darker);
+    font-weight: 650;
+}
+
+.explore__locate:disabled {
+    opacity: 0.52;
+    cursor: default;
+}
+
+.explore__locate:disabled:hover,
+.explore__locate:disabled:focus-visible {
+    background: transparent;
+}
+
+.explore__locate:disabled:hover .explore__label {
+    text-decoration: none;
+}
+
+.explore__label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.explore__count {
+    flex: 0 0 auto;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
+    font-variant-numeric: tabular-nums;
+}
+
+
+.explore__action-separator {
+    color: var(--color-border);
+}
+
+.explore__multiple-note {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 2px 4px;
+    border: 0;
+    border-radius: var(--radius-small);
+    background: var(--color-primary-subtle);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-caption);
+    min-width: 0;
+    order: 1;
+}
+
+.explore__multiple-note .special-marker {
+    flex: 0 0 auto;
+}
+
+.explore__symbol {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 16px;
+    width: var(--marker-icon-size);
+    height: var(--marker-icon-size);
+    border-radius: 50%;
+    background: var(--marker-color, transparent);
+}
+
+.explore__symbol[data-kind="unspecified"],
+.explore__symbol[data-kind="multiple"] {
+    background: var(--color-marker-special);
+    color: var(--color-on-accent);
+    font-size: var(--font-size-caption);
+    font-weight: 700;
+}
+
+
+.explore__search {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.explore__search-field {
+    position: relative;
+    min-width: 0;
+}

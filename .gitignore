@@ -1,0 +1,43 @@
+# IDEs
+.idea/
+.vscode/
+
+# Node.js
+node_modules/
+dist/
+build/
+coverage/
+.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python environments and caches
+.env
+.venv/
+env/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+thumbs.db
+Desktop.ini
+desktop.ini
+
+# Maintenance working/build data
+data/
+
+# Temporary files
+*.tmp
+*.part
+
+# Local development / scratch
+temp-site/
+scratch/
+tests/samples/

@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use iTópos in research, teaching, or publication, please cite the software."
+title: "iTópos"
+version: "0.1.0"
+date-released: "2026-09-20"
+license: "Apache-2.0"
+
+authors:
+  - family-names: "Chu"
+    given-names: "Carol"
+    orcid: "https://orcid.org/0009-0005-8372-354X"
+
+repository-code: "https://github.com/dhtoolbox/iTopos"
+url: "https://github.com/dhtoolbox/iTopos"
+
+abstract: >-
+  iTópos is an open-source browser-based application for interactive mapping,
+  exploration, and temporal visualization of places from the Pleiades gazetteer.
+  It supports spreadsheet-based mapping, browsing and filtering of Pleiades places,
+  exploration of overlapping historical time periods and temporal attestations,
+  and export of mapped place data for further research.
+
+keywords:
+  - Pleiades
+  - gazetteer
+  - digital humanities
+  - historical geography
+  - ancient geography
+  - archaeology
+  - ancient history
+  - historical mapping
+  - temporal visualization
+  - geospatial visualization
+  - MapLibre
