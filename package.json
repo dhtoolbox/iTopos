@@ -1,6 +1,5 @@
 {
   "name": "iTopos",
-  "version": "1.0.0",
   "description": "iTópos is a browser-side spatial visualizer designed to parse, validate, and plot numeric **Pleiades IDs** from Excel or CSV spreadsheets directly onto an interactive MapLibre map.",
   "main": "index.js",
   "directories": {
