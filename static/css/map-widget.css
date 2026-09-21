@@ -88,3 +88,15 @@
         width: min(280px, calc(100vw - 20px));
     }
 }
+
+@media (max-width: 760px), (max-height: 520px) and (orientation: landscape) {
+    .map-info-stack {
+        top: 8px;
+        left: 8px;
+        max-height: calc(100% - 16px);
+    }
+
+    #explore-widget.ui-panel {
+        max-height: min(58vh, 420px);
+    }
+}

@@ -51,6 +51,32 @@ export function initializePleiadesSearch({ onMapSelected, onMapAll, onError }) {
   const mapButton = root.querySelector("#pleiades-map-selected");
   const selectedCount = root.querySelector("#browse-selected-count");
   const mapAllButton = document.getElementById("browse-map-all");
+  const scrollArea = root.querySelector(".browse-places__scroll");
+
+  function updateScrollCue() {
+    if (!scrollArea) return;
+    const hasMoreBelow = scrollArea.scrollHeight - scrollArea.scrollTop - scrollArea.clientHeight > 4;
+    scrollArea.classList.toggle("has-more-below", hasMoreBelow);
+  }
+
+  scrollArea?.addEventListener("scroll", updateScrollCue, { passive: true });
+  window.addEventListener("resize", updateScrollCue);
+
+  // Browse can initialize while its drawer is hidden, so its first measured
+  // clientHeight may be zero. Recheck whenever the scroll viewport becomes
+  // visible/resizes and whenever its rendered contents change. This makes the
+  // mobile continuation cue correct before the user has scrolled.
+  const scrollCueResizeObserver = scrollArea && typeof ResizeObserver !== "undefined"
+    ? new ResizeObserver(() => updateScrollCue())
+    : null;
+  scrollCueResizeObserver?.observe(scrollArea);
+
+  const scrollCueMutationObserver = scrollArea && typeof MutationObserver !== "undefined"
+    ? new MutationObserver(() => requestAnimationFrame(updateScrollCue))
+    : null;
+  scrollCueMutationObserver?.observe(scrollArea, { childList: true, subtree: true });
+
+  requestAnimationFrame(updateScrollCue);
 
   let corpus = null;
   let types = null;

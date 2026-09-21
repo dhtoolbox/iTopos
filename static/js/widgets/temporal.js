@@ -1057,6 +1057,13 @@ export function initializeTemporalWidget({
     return enabled;
   }
 
+  function minimize() {
+    if (!enabled || minimized) return;
+    minimized = true;
+    closeChooser();
+    render();
+  }
+
   function destroy() {
     stop();
     loaded = false;
@@ -1065,7 +1072,7 @@ export function initializeTemporalWidget({
     onVisibilityChange?.(false);
   }
 
-  return { loadDataset, setEnabled, isEnabled, destroy };
+  return { loadDataset, setEnabled, isEnabled, minimize, destroy };
 }
 
 function escapeHtml(value) {

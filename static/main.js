@@ -40,6 +40,10 @@ const mapAllPlaces = document.querySelector("#browse-map-all");
 
 const mapContainer = document.querySelector("#map-container");
 const appStatus = document.querySelector("#app-status");
+const siteHeader = document.querySelector(".site-header");
+const mapInfoStack = document.querySelector("#map-info-stack");
+const shortLandscape = window.matchMedia("(max-height: 520px) and (orientation: landscape)");
+const mobileViewport = window.matchMedia("(max-width: 760px), (max-height: 520px) and (orientation: landscape)");
 
 let explore = null;
 const placeExport = initializePlaceExport();
@@ -48,6 +52,12 @@ const temporal = initializeTemporalWidget({
     setTemporalPlaceEvidence(state.filteringDisabled ? new Map() : state.placeEvidence);
     setTemporalPopupState(state);
   },
+});
+
+appStatus?.addEventListener("click", (event) => {
+  if (!event.target.closest(".app-status__clear")) return;
+  explore?.clearFocus?.();
+  blurMapFocusControl();
 });
 
 function blurMapFocusControl() {
@@ -125,6 +135,26 @@ const pleiadesSearch = initializePleiadesSearch({
     showProcessingError(message);
   },
 });
+
+
+function syncMobileOverlayState() {
+  if (mobileViewport.matches) {
+    if (appStatus && mapInfoStack && appStatus.parentElement !== mapInfoStack) {
+      mapInfoStack.append(appStatus);
+    }
+  } else if (appStatus && siteHeader && appStatus.parentElement !== siteHeader) {
+    siteHeader.insertBefore(appStatus, siteHeader.querySelector(".site-utilities"));
+  }
+
+  if (shortLandscape.matches) {
+    explore?.close?.();
+    temporal.minimize?.();
+  }
+}
+
+mobileViewport.addEventListener?.("change", syncMobileOverlayState);
+shortLandscape.addEventListener?.("change", syncMobileOverlayState);
+window.addEventListener("orientationchange", () => window.setTimeout(syncMobileOverlayState, 80));
 
 const drawer = initializeDrawer({
   initialMinimized: true,
@@ -248,11 +278,16 @@ async function resolvePlaces(places, groups, duplicates, groupingEnabled, { sour
   if (source === "upload") upload.showLoaded(fileName);
 
   loadDataset(dataset);
-  temporal.loadDataset(dataset).catch((error) => console.warn("Temporal data unavailable:", error));
+  temporal
+    .loadDataset(dataset)
+    .then(() => {
+      if (mobileViewport.matches) temporal.minimize?.();
+    })
+    .catch((error) => console.warn("Temporal data unavailable:", error));
   await showProcessingReport({ dataset, groups, duplicates, result });
 
   if (map && mapLoaded) {
-    const exploreWasOpen = explore?.isOpen?.() ?? false;
+    const exploreWasOpen = mobileViewport.matches ? false : (explore?.isOpen?.() ?? false);
     explore?.destroy();
     explore = initializeExplore({
       dataset,
@@ -270,11 +305,22 @@ async function resolvePlaces(places, groups, duplicates, groupingEnabled, { sour
           appStatus.textContent = "";
           return;
         }
-        appStatus.textContent = `Highlighting: ${label} · Esc to clear`;
+        const text = document.createElement("span");
+        text.textContent = `Highlighting: ${label}`;
+        const clear = document.createElement("button");
+        clear.type = "button";
+        clear.className = "app-status__clear";
+        clear.textContent = "Clear";
+        clear.setAttribute("aria-label", `Clear highlight for ${label}`);
+        appStatus.replaceChildren(text, document.createTextNode(" · "), clear);
         appStatus.hidden = false;
       },
     });
 
+    syncMobileOverlayState();
     if (mapContainer) mapContainer.hidden = false;
+    if (mobileViewport.matches) drawer?.minimize?.();
   }
 }
+
+window.setTimeout(syncMobileOverlayState, 0);
