@@ -4,6 +4,7 @@ export function initializeDrawer({ onTabChange, initialMinimized = false } = {})
   const panes = [...document.querySelectorAll(".tool-drawer__pane")];
   const minimize = document.getElementById("tool-drawer-minimize");
   const layout = drawer?.closest(".layout");
+  const mobileViewport = window.matchMedia("(max-width: 760px), (max-height: 520px) and (orientation: landscape)");
 
   if (!drawer || tabs.length === 0 || panes.length === 0) return;
 
@@ -17,9 +18,14 @@ export function initializeDrawer({ onTabChange, initialMinimized = false } = {})
 
     if (minimize) {
       const icon = document.createElement("img");
-      icon.src = minimized
-        ? "./static/vendor/icons/angles-right.svg"
-        : "./static/vendor/icons/angles-left.svg";
+      const mobile = mobileViewport.matches;
+      icon.src = mobile
+        ? (minimized
+          ? "./static/vendor/icons/angles-down.svg"
+          : "./static/vendor/icons/angles-up.svg")
+        : (minimized
+          ? "./static/vendor/icons/angles-right.svg"
+          : "./static/vendor/icons/angles-left.svg");
       icon.alt = "";
       icon.setAttribute("aria-hidden", "true");
       icon.className = "control-icon";
@@ -63,6 +69,10 @@ export function initializeDrawer({ onTabChange, initialMinimized = false } = {})
 
   minimize?.addEventListener("click", () => {
     setMinimized(!drawer.classList.contains("is-minimized"));
+  });
+
+  mobileViewport.addEventListener?.("change", () => {
+    setMinimized(drawer.classList.contains("is-minimized"));
   });
 
   if (initialMinimized) {

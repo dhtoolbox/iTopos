@@ -241,7 +241,7 @@
               <p id="drop-instruction" class="supporting_text"></p>
               <p class="or">or</p>
               <button id="choose-file-button" class="primary-button" type="button">Choose a file</button>
-              <input id="file-input" type="file" hidden>
+              <input id="file-input" type="file" accept=".csv,.txt,.xls,.xlsx" hidden>
               <p class="supporting_text">Excel (.xlsx, .xls) · CSV (.csv, .txt)</p>
               <p class="privacy-note"><strong>This site does not store your file.</strong></p>
             </div>
@@ -338,6 +338,7 @@
       <h2 id="welcome-title">Welcome to <span>iTópos</span></h2>
     </div>
     <p><small><i>Explore Pleiades places with historical and geographic context.</i></small></p>
+    <p class="welcome-dialog__mobile-note">iTópos works best on a larger screen. Mobile exploration is supported, but complex maps and Temporal Exploration are easier to use on a tablet or desktop.</p>
     <div class="welcome-dialog__actions">
       <button id="welcome-upload" class="welcome-choice" type="button">
         <img src="./static/vendor/icons/file-arrow-up-solid.svg" alt="" aria-hidden="true">

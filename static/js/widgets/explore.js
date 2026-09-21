@@ -148,6 +148,10 @@ export function initializeExplore({ dataset, onFilterChange, onFocusPlaces, onHi
       return panel.isOpen();
     },
 
+    close() {
+      panel.close();
+    },
+
     hasFocus() {
       return Boolean(state.focusedFilter);
     },

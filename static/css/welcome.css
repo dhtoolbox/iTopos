@@ -105,3 +105,21 @@
     color: var(--color-text-muted);
     font-size: var(--font-size-meta);
 }
+
+.welcome-dialog__mobile-note {
+    display: none;
+}
+
+@media (max-width: 760px) {
+    .welcome-dialog__mobile-note {
+        display: block;
+        margin: -4px 0 14px !important;
+        padding: 8px 10px;
+        border-left: 3px solid var(--color-primary);
+        border-radius: 0 var(--radius-small) var(--radius-small) 0;
+        background: var(--color-primary-subtle);
+        font-size: var(--font-size-caption);
+        line-height: 1.4;
+        text-align: left;
+    }
+}

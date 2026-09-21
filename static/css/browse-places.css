@@ -622,3 +622,46 @@
     min-height: 36px;
     padding: 7px 12px;
 }
+
+/* Mobile Browse: turn the footer divider into a persistent scroll cue. */
+@media (max-width: 760px), (max-height: 520px) and (orientation: landscape) {
+    .browse-places__scroll {
+        padding-bottom: 8px;
+    }
+
+    .browse-map-footer {
+        position: relative;
+        gap: 4px;
+        margin-top: 5px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+    }
+
+    .browse-places__scroll.has-more-below + .browse-map-footer::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 14px;
+        right: 14px;
+        height: 20px;
+        background:
+            linear-gradient(var(--color-border-light), var(--color-border-light)) left center / calc(50% - 18px) 1px no-repeat,
+            url("../vendor/icons/angles-down.svg") center / 16px 16px no-repeat,
+            linear-gradient(var(--color-border-light), var(--color-border-light)) right center / calc(50% - 18px) 1px no-repeat;
+        pointer-events: none;
+    }
+
+    .browse-map-footer .primary-button {
+        min-height: 34px;
+        padding-block: 6px;
+    }
+
+    .browse-map-footer__note {
+        line-height: 1.2;
+    }
+
+    .browse-export-places {
+        min-height: 28px;
+        padding-block: 2px;
+    }
+}
