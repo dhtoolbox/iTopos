@@ -49,7 +49,7 @@ export function buildTemporalModel(records, periods, allowedConfidenceIndexes = 
     .filter(Boolean)
     .sort((a, b) => a.start - b.start || a.end - b.end || a.periodIndex - b.periodIndex);
 
-  if (periodStats.length < 2) return null;
+  if (!periodStats.length) return null;
   return { periodStats, locationRecords, nameRecords, periods };
 }
 
@@ -89,6 +89,10 @@ export function chooseInitialPeriodIndexes(
   return chosen;
 }
 
+export function retainPeriodIndexesByKey(periodIndexes, previousKeys, periods) {
+  return periodIndexes.filter((index) => previousKeys.has(periods[index]?.[0]));
+}
+
 export function groupDisplayedPeriods(periodIndexes, periodStats) {
   const statsByIndex = new Map(periodStats.map((item) => [item.periodIndex, item]));
   const groups = new Map();
@@ -120,7 +124,9 @@ export function packPeriodGroups(groups) {
 
 export function summarizeTemporalPeriods(model, selectedPeriodIndexes) {
   const selected = new Set(selectedPeriodIndexes);
-  if (!selected.size) return { places: 0, locations: 0, names: 0, types: 0, periods: 0 };
+  if (!model || !selected.size) {
+    return { places: 0, locations: 0, names: 0, types: 0, periods: 0 };
+  }
   const activeLocations = model.locationRecords.filter((record) =>
     record.attestations.some(([period]) => selected.has(period)),
   );
@@ -329,6 +335,7 @@ export function initializeTemporalWidget({
   let timer = null;
   let isPlaying = false;
   let model = null;
+  let availableModel = null;
   let periods = [];
   let records = new Map();
   let confidences = [];
@@ -356,6 +363,11 @@ export function initializeTemporalWidget({
       loadPleiadesConfidences(),
       loadPleiadesTemporalPlaces(ids),
     ]);
+    availableModel = buildTemporalModel(
+      records,
+      periods,
+      new Set(confidences.map((_, index) => index)),
+    );
     displayed = new Set();
     selected = new Set();
     loaded = true;
@@ -366,6 +378,9 @@ export function initializeTemporalWidget({
     const previousDisplayedKeys = preserveDisplayed
       ? new Set([...displayed].map((index) => periods[index]?.[0]).filter(Boolean))
       : new Set();
+    const previousSelectedKeys = preserveDisplayed
+      ? new Set([...selected].map((index) => periods[index]?.[0]).filter(Boolean))
+      : new Set();
     if (includeAllConfidence)
       allowedConfidenceIndexes = new Set(confidences.map((_, index) => index));
     if (!allowedConfidenceIndexes.size) {
@@ -374,11 +389,12 @@ export function initializeTemporalWidget({
       );
     }
     const allowed = new Set(allowedConfidenceIndexes);
-    model = buildTemporalModel(records, periods, allowed);
-    if (!model) {
-      // A mapped Place may still have Locations/Names with an unspecified date
-      // range even when there are too few attested periods to show the widget.
-      // Keep that evidence available to the popup.
+    const filteredModel = buildTemporalModel(records, periods, allowed);
+
+    // The period score belongs to the mapped dataset, not to the current
+    // confidence filter. Confidence changes which evidence is active; it must
+    // not make the widget or its available periods disappear.
+    if (!availableModel) {
       const placeEvidence = buildTemporalPlaceEvidence(
         records,
         periods,
@@ -401,13 +417,30 @@ export function initializeTemporalWidget({
       return;
     }
 
-    const available = new Set(model.periodStats.map((item) => item.periodIndex));
-    const retained = model.periodStats
+    model = filteredModel ?? {
+      ...availableModel,
+      locationRecords: [],
+      nameRecords: [],
+    };
+    model.periodStats = availableModel.periodStats;
+
+    const available = new Set(availableModel.periodStats.map((item) => item.periodIndex));
+    const retained = availableModel.periodStats
       .filter((item) => previousDisplayedKeys.has(periods[item.periodIndex]?.[0]))
       .map((item) => item.periodIndex);
-    const initial = retained.length ? retained : chooseInitialPeriodIndexes(model.periodStats);
+    const initial = retained.length
+      ? retained
+      : chooseInitialPeriodIndexes(availableModel.periodStats);
     displayed = new Set(initial.filter((index) => available.has(index)));
-    selected = new Set(displayed);
+    selected = preserveDisplayed
+      ? new Set(
+          retainPeriodIndexesByKey(
+            availableModel.periodStats.map((item) => item.periodIndex),
+            previousSelectedKeys,
+            periods,
+          ),
+        )
+      : new Set(displayed);
     playbackIndex = 0;
     render(includeAllConfidence);
     root.hidden = !enabled;
@@ -1067,6 +1100,8 @@ export function initializeTemporalWidget({
   function destroy() {
     stop();
     loaded = false;
+    model = null;
+    availableModel = null;
     root.hidden = true;
     root.replaceChildren();
     onVisibilityChange?.(false);

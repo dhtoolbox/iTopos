@@ -10,6 +10,7 @@ import {
   groupDisplayedPeriods,
   packPeriodGroups,
   summarizeTemporalPeriods,
+  retainPeriodIndexesByKey,
 } from "../../static/js/widgets/temporal.js";
 
 const periods = [
@@ -92,14 +93,21 @@ describe("temporal score model", () => {
     expect(scale.percent(2100)).toBeCloseTo(100);
   });
 
-  it("requires at least two represented periods", () => {
+  it("keeps a single represented period", () => {
     const records = new Map([["1", { locations: [{ types: [2], attestations: [[1, 0]] }], names: [] }]]);
-    expect(buildTemporalModel(records, periods, new Set([0]))).toBeNull();
+    const model = buildTemporalModel(records, periods, new Set([0]));
+    expect(model).not.toBeNull();
+    expect(model.periodStats).toHaveLength(1);
+    expect(model.periodStats[0].periodIndex).toBe(1);
   });
 
-  it("excludes disallowed confidence", () => {
+  it("excludes disallowed confidence while retaining allowed evidence", () => {
     const records = new Map([["1", { locations: [{ types: [2], attestations: [[0, 2], [1, 0]] }], names: [] }]]);
-    expect(buildTemporalModel(records, periods, new Set([0]))).toBeNull();
+    const model = buildTemporalModel(records, periods, new Set([0]));
+    expect(model).not.toBeNull();
+    expect(model.periodStats).toHaveLength(1);
+    expect(model.periodStats[0].periodIndex).toBe(1);
+    expect(model.locationRecords[0].attestations).toEqual([[1, 0]]);
   });
 
   it("uses a real chronological axis", () => {
@@ -171,4 +179,55 @@ describe("temporal score model", () => {
     expect(scale.percent(-18000)).toBe(100);
   });
 
+});
+
+
+describe("confidence-filter edge cases", () => {
+  it("summarizes a missing temporal model safely", () => {
+    expect(summarizeTemporalPeriods(null, new Set([1]))).toEqual({
+      places: 0,
+      locations: 0,
+      names: 0,
+      types: 0,
+      periods: 0,
+    });
+  });
+
+  it("retains available periods while confidence-filtered evidence is empty", () => {
+    const availableModel = {
+      periodStats: [
+        { periodIndex: 0, start: -100, end: 0, places: 1, locations: 1, names: 0, evidence: 1 },
+        { periodIndex: 1, start: 0, end: 100, places: 1, locations: 1, names: 0, evidence: 1 },
+      ],
+      locationRecords: [],
+      nameRecords: [],
+      periods: [
+        ["a", "A", -100, 0],
+        ["b", "B", 0, 100],
+      ],
+    };
+
+    expect(summarizeTemporalPeriods(availableModel, new Set([0, 1]))).toEqual({
+      places: 0,
+      locations: 0,
+      names: 0,
+      types: 0,
+      periods: 2,
+    });
+  });
+});
+
+
+describe("confidence rebuild state", () => {
+  it("preserves the active period selection across a confidence rebuild", () => {
+    const periods = [
+      ["classical", "Classical", -500, -330],
+      ["hell", "Hellenistic", -330, -30],
+      ["roman", "Roman", -30, 300],
+    ];
+
+    expect(
+      retainPeriodIndexesByKey([0, 1, 2], new Set(["roman"]), periods),
+    ).toEqual([2]);
+  });
 });
